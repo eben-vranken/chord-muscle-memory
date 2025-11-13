@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guitar Chord Practice Timer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace;
+            background: #0a0a0a;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Tech grid background */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+        }
+
+        .container {
+            background: #111111;
+            border: 1px solid #2a2a2a;
+            padding: 40px;
+            max-width: 700px;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 {
+            text-align: center;
+            color: #ffffff;
+            margin-bottom: 40px;
+            font-size: 24px;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            font-weight: 300;
+            position: relative;
+            padding-bottom: 20px;
+        }
+
+        h1::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #ffffff, transparent);
+        }
+
+        /* Mode selector */
+        .mode-selector {
+            display: flex;
+            gap: 0;
+            margin-bottom: 40px;
+            border: 1px solid #333;
+            background: #0a0a0a;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 15px 20px;
+            background: transparent;
+            color: #666;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+        }
+
+        .mode-btn:not(:last-child) {
+            border-right: 1px solid #333;
+        }
+
+        .mode-btn:hover {
+            background: #1a1a1a;
+            color: #999;
+        }
+
+        .mode-btn.active {
+            background: #ffffff;
+            color: #000000;
+            font-weight: 600;
+        }
+
+        /* Single Chord Mode */
+        .mode-content {
+            display: none;
+        }
+
+        .mode-content.active {
+            display: block;
+        }
+
+        .controls {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 40px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        label {
+            font-weight: 300;
+            color: #999;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        input[type="number"] {
+            width: 80px;
+            padding: 10px;
+            border: 1px solid #333;
+            background: #0a0a0a;
+            color: #ffffff;
+            font-size: 14px;
+            font-family: inherit;
+            text-align: center;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #666;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 12px;
+            font-weight: 400;
+            border: 1px solid #333;
+            background: transparent;
+            color: #ffffff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        button:hover {
+            background: #ffffff;
+            color: #000000;
+            border-color: #ffffff;
+        }
+
+        .btn-primary {
+            border-color: #ffffff;
+        }
+
+        .btn-secondary.active {
+            background: #ffffff;
+            color: #000000;
+        }
+
+        .chord-display {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 40px 0;
+            border-top: 1px solid #2a2a2a;
+            border-bottom: 1px solid #2a2a2a;
+        }
+
+        .current-chord {
+            font-size: 80px;
+            font-weight: 100;
+            color: #ffffff;
+            margin-bottom: 10px;
+            letter-spacing: 8px;
+        }
+
+        .chord-info {
+            font-size: 14px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+        }
+
+        /* Chord Changes Mode Display */
+        .chord-changes-display {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .chord-pair {
+            text-align: center;
+        }
+
+        .chord-pair .chord {
+            font-size: 60px;
+            font-weight: 100;
+            color: #ffffff;
+            letter-spacing: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .chord-pair .type {
+            font-size: 12px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 10px;
+        }
+
+        .arrow {
+            font-size: 30px;
+            color: #666;
+        }
+
+        .timer-display {
+            font-size: 48px;
+            font-weight: 100;
+            color: #ffffff;
+            font-family: 'SF Mono', 'Monaco', monospace;
+            margin-bottom: 20px;
+            letter-spacing: 4px;
+        }
+
+        .progress {
+            width: 100%;
+            height: 2px;
+            background: #1a1a1a;
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: #ffffff;
+            transition: width 0.1s linear;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .chord-list {
+            margin-top: 40px;
+            padding-top: 40px;
+            border-top: 1px solid #2a2a2a;
+        }
+
+        .chord-list h3 {
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 400;
+            text-align: center;
+        }
+
+        .chords-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+        }
+
+        .chord-tag {
+            padding: 12px;
+            background: transparent;
+            border: 1px solid #2a2a2a;
+            font-size: 14px;
+            font-weight: 300;
+            color: #666;
+            transition: all 0.3s ease;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        .chord-tag.current {
+            background: #ffffff;
+            color: #000000;
+            border-color: #ffffff;
+        }
+
+        .status {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 11px;
+            color: #444;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .pulse {
+            animation: pulse 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Chord Practice</h1>
+        
+        <!-- Mode Selector -->
+        <div class="mode-selector">
+            <button class="mode-btn active" onclick="switchMode('single')">Single Chords</button>
+            <button class="mode-btn" onclick="switchMode('changes')">Chord Changes</button>
+        </div>
+
+        <!-- Single Chord Mode -->
+        <div id="singleMode" class="mode-content active">
+            <div class="controls">
+                <div class="control-group">
+                    <label for="timerInput">Seconds per chord</label>
+                    <input type="number" id="timerInput" value="10" min="1" max="300">
+                </div>
+                <button class="btn-secondary" id="shuffleBtn" onclick="toggleShuffle()">
+                    Shuffle: OFF
+                </button>
+            </div>
+
+            <div class="chord-display">
+                <div class="current-chord" id="currentChord">A</div>
+                <div class="chord-info" id="chordInfo">MAJOR</div>
+                <div class="timer-display" id="timerDisplay">10</div>
+                <div class="progress">
+                    <div class="progress-bar" id="progressBar" style="width: 100%;"></div>
+                </div>
+            </div>
+
+            <div class="buttons">
+                <button class="btn-primary" id="startBtn" onclick="startPractice()">Start</button>
+                <button class="btn-primary" id="pauseBtn" onclick="pausePractice()" style="display:none;">Pause</button>
+                <button class="btn-secondary" onclick="nextChord()">Next →</button>
+                <button class="btn-secondary" onclick="resetPractice()">Reset</button>
+            </div>
+
+            <div class="chord-list">
+                <h3>Chord Pool</h3>
+                <div class="chords-grid" id="chordsList"></div>
+            </div>
+        </div>
+
+        <!-- Chord Changes Mode -->
+        <div id="changesMode" class="mode-content">
+            <div class="controls">
+                <div class="control-group">
+                    <label for="changeTimerInput">Seconds per pair</label>
+                    <input type="number" id="changeTimerInput" value="30" min="5" max="120">
+                </div>
+                <button class="btn-secondary" onclick="generateNewPair()">New Pair</button>
+            </div>
+
+            <div class="chord-display">
+                <div class="chord-changes-display">
+                    <div class="chord-pair" id="chord1">
+                        <div class="chord">A</div>
+                        <div class="type">MAJOR</div>
+                    </div>
+                    <div class="arrow">⟷</div>
+                    <div class="chord-pair" id="chord2">
+                        <div class="chord">D</div>
+                        <div class="type">MAJOR</div>
+                    </div>
+                </div>
+                <div class="timer-display" id="changeTimerDisplay">30</div>
+                <div class="progress">
+                    <div class="progress-bar" id="changeProgressBar" style="width: 100%;"></div>
+                </div>
+            </div>
+
+            <div class="buttons">
+                <button class="btn-primary" id="startChangesBtn" onclick="startChanges()">Start</button>
+                <button class="btn-primary" id="pauseChangesBtn" onclick="pauseChanges()" style="display:none;">Pause</button>
+                <button class="btn-secondary" onclick="resetChanges()">Reset</button>
+            </div>
+        </div>
+
+        <div class="status" id="status"></div>
+    </div>
+
+    <script>
+        // Updated chord list - only major and minor cowboy chords (no C minor, no G minor)
+        const chords = [
+            { name: 'A', type: 'Major' },
+            { name: 'A', type: 'Minor' },
+            { name: 'E', type: 'Major' },
+            { name: 'E', type: 'Minor' },
+            { name: 'D', type: 'Major' },
+            { name: 'D', type: 'Minor' },
+            { name: 'C', type: 'Major' },
+            { name: 'G', type: 'Major' }
+        ];
+
+        // Single chord mode variables
+        let currentIndex = 0;
+        let timerInterval = null;
+        let timeRemaining = 10;
+        let isRunning = false;
+        let isShuffle = false;
+        let practiceChords = [...chords];
+
+        // Chord changes mode variables
+        let changeTimerInterval = null;
+        let changeTimeRemaining = 30;
+        let isChangesRunning = false;
+        let currentChordPair = [];
+        let sessionPairs = [];
+        let currentPairIndex = 0;
+
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playBeep(frequency = 800) {
+            const now = audioContext.currentTime;
+            const oscillator = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+
+            oscillator.connect(gain);
+            gain.connect(audioContext.destination);
+
+            oscillator.frequency.value = frequency;
+            oscillator.type = 'sine';
+
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+
+            oscillator.start(now);
+            oscillator.stop(now + 0.1);
+        }
+
+        // Mode switching
+        function switchMode(mode) {
+            // Stop any running timers
+            pausePractice();
+            pauseChanges();
+
+            // Update UI
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.mode-content').forEach(content => content.classList.remove('active'));
+
+            if (mode === 'single') {
+                document.querySelectorAll('.mode-btn')[0].classList.add('active');
+                document.getElementById('singleMode').classList.add('active');
+            } else {
+                document.querySelectorAll('.mode-btn')[1].classList.add('active');
+                document.getElementById('changesMode').classList.add('active');
+                if (currentChordPair.length === 0) {
+                    generateNewPair();
+                }
+            }
+        }
+
+        // Single Chord Mode Functions
+        function displayChords() {
+            const list = document.getElementById('chordsList');
+            list.innerHTML = '';
+            practiceChords.forEach((chord, idx) => {
+                const tag = document.createElement('div');
+                tag.className = 'chord-tag';
+                if (idx === currentIndex) tag.classList.add('current');
+                tag.textContent = `${chord.name}${chord.type === 'Minor' ? 'm' : ''}`;
+                list.appendChild(tag);
+            });
+        }
+
+        function updateDisplay() {
+            const chord = practiceChords[currentIndex];
+            document.getElementById('currentChord').textContent = chord.name;
+            document.getElementById('chordInfo').textContent = chord.type.toUpperCase();
+            document.getElementById('timerDisplay').textContent = Math.ceil(timeRemaining);
+            
+            const progress = (timeRemaining / parseInt(document.getElementById('timerInput').value)) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+            
+            displayChords();
+        }
+
+        function nextChord() {
+            currentIndex = (currentIndex + 1) % practiceChords.length;
+            timeRemaining = parseInt(document.getElementById('timerInput').value);
+            updateDisplay();
+            document.getElementById('currentChord').classList.add('pulse');
+            setTimeout(() => document.getElementById('currentChord').classList.remove('pulse'), 500);
+        }
+
+        function startPractice() {
+            if (isRunning) return;
+            isRunning = true;
+            document.getElementById('startBtn').style.display = 'none';
+            document.getElementById('pauseBtn').style.display = 'inline-block';
+            
+            timerInterval = setInterval(() => {
+                timeRemaining -= 0.1;
+                updateDisplay();
+
+                if (timeRemaining <= 0) {
+                    playBeep();
+                    nextChord();
+                }
+            }, 100);
+        }
+
+        function pausePractice() {
+            isRunning = false;
+            clearInterval(timerInterval);
+            document.getElementById('startBtn').style.display = 'inline-block';
+            document.getElementById('pauseBtn').style.display = 'none';
+        }
+
+        function resetPractice() {
+            pausePractice();
+            currentIndex = 0;
+            timeRemaining = parseInt(document.getElementById('timerInput').value);
+            updateDisplay();
+        }
+
+        function toggleShuffle() {
+            isShuffle = !isShuffle;
+            document.getElementById('shuffleBtn').textContent = `Shuffle: ${isShuffle ? 'ON' : 'OFF'}`;
+            document.getElementById('shuffleBtn').classList.toggle('active');
+            
+            if (isShuffle) {
+                practiceChords = [...chords].sort(() => Math.random() - 0.5);
+            } else {
+                practiceChords = [...chords];
+            }
+            
+            currentIndex = 0;
+            timeRemaining = parseInt(document.getElementById('timerInput').value);
+            updateDisplay();
+        }
+
+        // Chord Changes Mode Functions
+        function generateNewPair() {
+            const shuffled = [...chords].sort(() => Math.random() - 0.5);
+            currentChordPair = [shuffled[0], shuffled[1]];
+            updateChangesDisplay();
+        }
+
+        function generateSessionPairs() {
+            // Generate multiple unique pairs for the session
+            sessionPairs = [];
+            const usedPairs = new Set();
+            
+            while (sessionPairs.length < 10) { // Generate 10 pairs for variety
+                const shuffled = [...chords].sort(() => Math.random() - 0.5);
+                const pairKey = `${shuffled[0].name}${shuffled[0].type}-${shuffled[1].name}${shuffled[1].type}`;
+                const reversePairKey = `${shuffled[1].name}${shuffled[1].type}-${shuffled[0].name}${shuffled[0].type}`;
+                
+                if (!usedPairs.has(pairKey) && !usedPairs.has(reversePairKey)) {
+                    sessionPairs.push([shuffled[0], shuffled[1]]);
+                    usedPairs.add(pairKey);
+                }
+            }
+            currentPairIndex = 0;
+            currentChordPair = sessionPairs[0];
+        }
+
+        function nextChordPair() {
+            currentPairIndex = (currentPairIndex + 1) % sessionPairs.length;
+            currentChordPair = sessionPairs[currentPairIndex];
+            changeTimeRemaining = parseInt(document.getElementById('changeTimerInput').value);
+            updateChangesDisplay();
+            
+            // Flash animation for new pair
+            document.querySelectorAll('.chord-pair .chord').forEach(el => {
+                el.classList.add('pulse');
+                setTimeout(() => el.classList.remove('pulse'), 500);
+            });
+        }
+
+        function updateChangesDisplay() {
+            const chord1 = currentChordPair[0];
+            const chord2 = currentChordPair[1];
+            
+            document.querySelector('#chord1 .chord').textContent = chord1.name;
+            document.querySelector('#chord1 .type').textContent = chord1.type.toUpperCase();
+            document.querySelector('#chord2 .chord').textContent = chord2.name;
+            document.querySelector('#chord2 .type').textContent = chord2.type.toUpperCase();
+            
+            document.getElementById('changeTimerDisplay').textContent = Math.ceil(changeTimeRemaining);
+            
+            const progress = (changeTimeRemaining / parseInt(document.getElementById('changeTimerInput').value)) * 100;
+            document.getElementById('changeProgressBar').style.width = progress + '%';
+        }
+
+        function startChanges() {
+            if (isChangesRunning) return;
+            
+            // Generate session pairs if not already done
+            if (sessionPairs.length === 0) {
+                generateSessionPairs();
+            }
+            
+            isChangesRunning = true;
+            document.getElementById('startChangesBtn').style.display = 'none';
+            document.getElementById('pauseChangesBtn').style.display = 'inline-block';
+            
+            changeTimerInterval = setInterval(() => {
+                changeTimeRemaining -= 0.1;
+                updateChangesDisplay();
+
+                if (changeTimeRemaining <= 0) {
+                    playBeep(1000); // Higher pitch beep for time up
+                    nextChordPair();
+                }
+            }, 100);
+        }
+
+        function pauseChanges() {
+            isChangesRunning = false;
+            clearInterval(changeTimerInterval);
+            document.getElementById('startChangesBtn').style.display = 'inline-block';
+            document.getElementById('pauseChangesBtn').style.display = 'none';
+        }
+
+        function resetChanges() {
+            pauseChanges();
+            changeTimeRemaining = parseInt(document.getElementById('changeTimerInput').value);
+            sessionPairs = [];
+            generateNewPair();
+            updateChangesDisplay();
+        }
+
+        // Event listeners
+        document.getElementById('timerInput').addEventListener('change', () => {
+            if (!isRunning) {
+                timeRemaining = parseInt(document.getElementById('timerInput').value);
+                updateDisplay();
+            }
+        });
+
+        document.getElementById('changeTimerInput').addEventListener('change', () => {
+            if (!isChangesRunning) {
+                changeTimeRemaining = parseInt(document.getElementById('changeTimerInput').value);
+                updateChangesDisplay();
+            }
+        });
+
+        // Initialize
+        updateDisplay();
+        generateNewPair();
+    </script>
+</body>
+</html>
