@@ -924,28 +924,15 @@
         }
 
         function generateProgressionChords() {
-            // Find the next progression that matches the current key type
-            let attempts = 0;
-            while (attempts < progressions.length) {
-                const progression = progressions[currentProgressionIndex];
-                
-                // Check if this progression matches the current key type
-                if (progression.keyType === currentKey.type) {
-                    // Good match - generate the chords
-                    currentProgressionChords = progression.numerals.map(numeral => 
-                        numeralToChord(numeral, currentKey.root, currentKey.type)
-                    );
-                    return;
-                } else {
-                    // Skip to next progression
-                    currentProgressionIndex = (currentProgressionIndex + 1) % progressions.length;
-                    attempts++;
-                }
+            const progression = progressions[currentProgressionIndex];
+            
+            // If the progression doesn't match the current key type, switch to a matching key
+            if (progression.keyType !== currentKey.type) {
+                const validKeys = allKeys.filter(k => k.type === progression.keyType);
+                currentKey = validKeys[Math.floor(Math.random() * validKeys.length)];
             }
             
-            // If we get here, no matching progressions found (shouldn't happen)
-            // Just generate with current progression anyway
-            const progression = progressions[currentProgressionIndex];
+            // Generate the chords
             currentProgressionChords = progression.numerals.map(numeral => 
                 numeralToChord(numeral, currentKey.root, currentKey.type)
             );
@@ -1046,7 +1033,7 @@
             }
             
             progressionTimeRemaining = parseInt(document.getElementById('progressionTimerInput').value);
-            generateProgressionChords(); // This will auto-skip to matching progression
+            generateProgressionChords(); // This will auto-switch key if progression type doesn't match
             updateProgressionsDisplay();
             
             // Pulse animation
@@ -1097,7 +1084,7 @@
             } while (allKeys.length > 1 && currentKey.root === oldKey.root && currentKey.type === oldKey.type);
             
             // Regenerate chords for current progression in the new key
-            // This will auto-skip to a matching progression if needed
+            // generateProgressionChords will auto-adjust key if needed to match progression type
             progressionTimeRemaining = parseInt(document.getElementById('progressionTimerInput').value);
             generateProgressionChords();
             updateProgressionsDisplay();
