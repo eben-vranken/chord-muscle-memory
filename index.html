@@ -248,207 +248,439 @@
             color: #666;
         }
 
+        /* Progression Mode Display */
+        .progression-display {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .progression-sequence {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .progression-chord {
+            text-align: center;
+        }
+
+        .progression-chord .chord {
+            font-size: 50px;
+            font-weight: 100;
+            color: #ffffff;
+            letter-spacing: 3px;
+            transition: all 0.3s ease;
+        }
+
+        .progression-chord .numeral {
+            font-size: 11px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 8px;
+        }
+
+        .progression-arrow {
+            font-size: 24px;
+            color: #444;
+        }
+
+        .progression-info {
+            font-size: 12px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .progression-key {
+            font-size: 14px;
+            color: #999;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+        }
+
+        /* Progress tracking */
+        .progress-tracker {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .progress-dot {
+            width: 10px;
+            height: 10px;
+            border: 1px solid #333;
+            background: #0a0a0a;
+            transition: all 0.3s ease;
+        }
+
+        .progress-dot.completed {
+            background: #666;
+        }
+
+        .progress-dot.current {
+            background: #ffffff;
+        }
+
+        /* Timer and Progress */
+        .timer {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
         .timer-display {
             font-size: 48px;
             font-weight: 100;
             color: #ffffff;
-            font-family: 'SF Mono', 'Monaco', monospace;
-            margin-bottom: 20px;
             letter-spacing: 4px;
         }
 
-        .progress {
-            width: 100%;
-            height: 2px;
+        .progress-bar-container {
+            height: 3px;
             background: #1a1a1a;
+            margin-bottom: 40px;
             overflow: hidden;
-            margin-bottom: 30px;
         }
 
         .progress-bar {
             height: 100%;
             background: #ffffff;
+            width: 100%;
             transition: width 0.1s linear;
         }
 
-        .buttons {
+        /* Chord List */
+        .chords-list {
             display: flex;
-            gap: 15px;
-            justify-content: center;
             flex-wrap: wrap;
-        }
-
-        .chord-list {
-            margin-top: 40px;
-            padding-top: 40px;
-            border-top: 1px solid #2a2a2a;
-        }
-
-        .chord-list h3 {
-            color: #666;
-            margin-bottom: 20px;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-weight: 400;
-            text-align: center;
-        }
-
-        .chords-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
             gap: 10px;
+            justify-content: center;
         }
 
         .chord-tag {
-            padding: 12px;
-            background: transparent;
-            border: 1px solid #2a2a2a;
-            font-size: 14px;
-            font-weight: 300;
+            padding: 8px 16px;
+            border: 1px solid #333;
             color: #666;
+            font-size: 12px;
             transition: all 0.3s ease;
-            text-align: center;
-            letter-spacing: 1px;
         }
 
         .chord-tag.current {
-            background: #ffffff;
-            color: #000000;
             border-color: #ffffff;
+            color: #ffffff;
+            background: #1a1a1a;
         }
 
-        .status {
-            text-align: center;
-            margin-top: 30px;
-            font-size: 11px;
-            color: #444;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        /* Animations */
         @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
 
         .pulse {
             animation: pulse 0.5s ease;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 18px;
+                letter-spacing: 2px;
+            }
+
+            .current-chord {
+                font-size: 60px;
+            }
+
+            .chord-pair .chord {
+                font-size: 40px;
+            }
+
+            .progression-chord .chord {
+                font-size: 35px;
+            }
+
+            .controls {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .mode-btn {
+                padding: 12px 15px;
+                font-size: 10px;
+            }
+
+            .chord-changes-display {
+                gap: 30px;
+            }
+
+            .progression-sequence {
+                gap: 15px;
+            }
+
+            .progression-arrow {
+                font-size: 18px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Chord Practice</h1>
-        
+
         <!-- Mode Selector -->
         <div class="mode-selector">
             <button class="mode-btn active" onclick="switchMode('single')">Single Chords</button>
             <button class="mode-btn" onclick="switchMode('changes')">Chord Changes</button>
+            <button class="mode-btn" onclick="switchMode('progressions')">Progressions</button>
         </div>
 
-        <!-- Single Chord Mode -->
+        <!-- SINGLE CHORD MODE -->
         <div id="singleMode" class="mode-content active">
             <div class="controls">
                 <div class="control-group">
-                    <label for="timerInput">Seconds per chord</label>
-                    <input type="number" id="timerInput" value="10" min="1" max="300">
+                    <label for="timerInput">Time per chord (s)</label>
+                    <input type="number" id="timerInput" value="30" min="5" max="300">
                 </div>
-                <button class="btn-secondary" id="shuffleBtn" onclick="toggleShuffle()">
-                    Shuffle: OFF
-                </button>
+                <button id="shuffleBtn" class="btn-secondary" onclick="toggleShuffle()">Shuffle: OFF</button>
             </div>
 
             <div class="chord-display">
-                <div class="current-chord" id="currentChord">A</div>
+                <div class="current-chord" id="currentChord">C</div>
                 <div class="chord-info" id="chordInfo">MAJOR</div>
-                <div class="timer-display" id="timerDisplay">10</div>
-                <div class="progress">
-                    <div class="progress-bar" id="progressBar" style="width: 100%;"></div>
+                
+                <div class="timer">
+                    <div class="timer-display" id="timerDisplay">30</div>
                 </div>
             </div>
 
-            <div class="buttons">
-                <button class="btn-primary" id="startBtn" onclick="startPractice()">Start</button>
-                <button class="btn-primary" id="pauseBtn" onclick="pausePractice()" style="display:none;">Pause</button>
-                <button class="btn-secondary" onclick="nextChord()">Next →</button>
-                <button class="btn-secondary" onclick="resetPractice()">Reset</button>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar"></div>
             </div>
 
-            <div class="chord-list">
-                <h3>Chord Pool</h3>
-                <div class="chords-grid" id="chordsList"></div>
+            <div class="controls">
+                <button id="startBtn" class="btn-primary" onclick="startPractice()">Start</button>
+                <button id="pauseBtn" class="btn-primary" onclick="pausePractice()" style="display: none;">Pause</button>
+                <button onclick="resetPractice()">Reset</button>
             </div>
+
+            <div class="chords-list" id="chordsList"></div>
         </div>
 
-        <!-- Chord Changes Mode -->
+        <!-- CHORD CHANGES MODE -->
         <div id="changesMode" class="mode-content">
             <div class="controls">
                 <div class="control-group">
-                    <label for="changeTimerInput">Seconds per pair</label>
-                    <input type="number" id="changeTimerInput" value="30" min="5" max="120">
+                    <label for="changeTimerInput">Time per change (s)</label>
+                    <input type="number" id="changeTimerInput" value="30" min="5" max="300">
                 </div>
-                <button class="btn-secondary" onclick="generateNewPair()">New Pair</button>
             </div>
 
             <div class="chord-display">
                 <div class="chord-changes-display">
                     <div class="chord-pair" id="chord1">
-                        <div class="chord">A</div>
+                        <div class="chord">C</div>
                         <div class="type">MAJOR</div>
                     </div>
-                    <div class="arrow">⟷</div>
+                    <div class="arrow">→</div>
                     <div class="chord-pair" id="chord2">
-                        <div class="chord">D</div>
+                        <div class="chord">G</div>
                         <div class="type">MAJOR</div>
                     </div>
                 </div>
-                <div class="timer-display" id="changeTimerDisplay">30</div>
-                <div class="progress">
-                    <div class="progress-bar" id="changeProgressBar" style="width: 100%;"></div>
+
+                <div class="timer">
+                    <div class="timer-display" id="changeTimerDisplay">30</div>
                 </div>
             </div>
 
-            <div class="buttons">
-                <button class="btn-primary" id="startChangesBtn" onclick="startChanges()">Start</button>
-                <button class="btn-primary" id="pauseChangesBtn" onclick="pauseChanges()" style="display:none;">Pause</button>
-                <button class="btn-secondary" onclick="resetChanges()">Reset</button>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="changeProgressBar"></div>
+            </div>
+
+            <div class="controls">
+                <button id="startChangesBtn" class="btn-primary" onclick="startChanges()">Start</button>
+                <button id="pauseChangesBtn" class="btn-primary" onclick="pauseChanges()" style="display: none;">Pause</button>
+                <button onclick="resetChanges()">Reset</button>
             </div>
         </div>
 
-        <div class="status" id="status"></div>
+        <!-- PROGRESSIONS MODE -->
+        <div id="progressionsMode" class="mode-content">
+            <div class="controls">
+                <div class="control-group">
+                    <label for="progressionTimerInput">Time per progression (s)</label>
+                    <input type="number" id="progressionTimerInput" value="30" min="5" max="300">
+                </div>
+            </div>
+
+            <div class="progression-display">
+                <div class="progression-info" id="progressionNumber">PROGRESSION 1 / 10</div>
+                <div class="progression-key" id="progressionKey">KEY: C MAJOR</div>
+                
+                <div class="progression-sequence" id="progressionSequence">
+                    <!-- Chords will be inserted here -->
+                </div>
+
+                <div class="timer">
+                    <div class="timer-display" id="progressionTimerDisplay">30</div>
+                </div>
+            </div>
+
+            <div class="progress-tracker" id="progressTracker">
+                <!-- Progress dots will be inserted here -->
+            </div>
+
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressionProgressBar"></div>
+            </div>
+
+            <div class="controls">
+                <button id="startProgressionsBtn" class="btn-primary" onclick="startProgressions()">Start</button>
+                <button id="pauseProgressionsBtn" class="btn-primary" onclick="pauseProgressions()" style="display: none;">Pause</button>
+                <button onclick="resetProgressions()">Reset</button>
+            </div>
+        </div>
     </div>
 
     <script>
-        // Updated chord list - only major and minor cowboy chords (no C minor, no G minor)
         const chords = [
-            { name: 'A', type: 'Major' },
-            { name: 'A', type: 'Minor' },
-            { name: 'E', type: 'Major' },
-            { name: 'E', type: 'Minor' },
-            { name: 'D', type: 'Major' },
-            { name: 'D', type: 'Minor' },
             { name: 'C', type: 'Major' },
-            { name: 'G', type: 'Major' }
+            { name: 'D', type: 'Major' },
+            { name: 'E', type: 'Major' },
+            { name: 'F', type: 'Major' },
+            { name: 'G', type: 'Major' },
+            { name: 'A', type: 'Major' },
+            { name: 'B', type: 'Major' },
+            { name: 'C', type: 'Minor' },
+            { name: 'D', type: 'Minor' },
+            { name: 'E', type: 'Minor' },
+            { name: 'F', type: 'Minor' },
+            { name: 'G', type: 'Minor' },
+            { name: 'A', type: 'Minor' },
+            { name: 'B', type: 'Minor' }
         ];
 
-        // Single chord mode variables
+        // Chord progressions in Roman numeral notation
+        const progressions = [
+            { numerals: ['I', 'V', 'vi', 'IV'], name: 'I – V – vi – IV' },
+            { numerals: ['vi', 'IV', 'I', 'V'], name: 'vi – IV – I – V' },
+            { numerals: ['I', 'vi', 'IV', 'V'], name: 'I – vi – IV – V' },
+            { numerals: ['IV', 'V', 'I', 'vi'], name: 'IV – V – I – vi' },
+            { numerals: ['I', 'IV', 'V'], name: 'I – IV – V' },
+            { numerals: ['ii', 'V', 'I'], name: 'ii – V – I' },
+            { numerals: ['i', 'VII', 'VI', 'V'], name: 'i – VII – VI – V' },
+            { numerals: ['I', 'vi', 'ii', 'V'], name: 'I – vi – ii – V' },
+            { numerals: ['I', 'IV', 'bVII', 'IV'], name: 'I – IV – ♭VII – IV' },
+            { numerals: ['vi', 'ii', 'V', 'I'], name: 'vi – ii – V – I' }
+        ];
+
+        // Major and minor scales
+        const majorScale = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+        const minorScale = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+        const allKeys = [
+            { root: 'C', type: 'Major' },
+            { root: 'D', type: 'Major' },
+            { root: 'E', type: 'Major' },
+            { root: 'F', type: 'Major' },
+            { root: 'G', type: 'Major' },
+            { root: 'A', type: 'Major' },
+            { root: 'B', type: 'Major' },
+            { root: 'A', type: 'Minor' },
+            { root: 'B', type: 'Minor' },
+            { root: 'C', type: 'Minor' },
+            { root: 'D', type: 'Minor' },
+            { root: 'E', type: 'Minor' },
+            { root: 'F', type: 'Minor' },
+            { root: 'G', type: 'Minor' }
+        ];
+
+        // Function to convert Roman numeral to chord in a specific key
+        function numeralToChord(numeral, keyRoot, keyType) {
+            const scale = keyType === 'Major' ? majorScale : minorScale;
+            const rootIndex = scale.indexOf(keyRoot);
+            
+            // Rotate scale to start from key root
+            const rotatedScale = [...scale.slice(rootIndex), ...scale.slice(0, rootIndex)];
+            
+            // Parse numeral
+            let degree = 0;
+            let isMinor = false;
+            let isFlat = false;
+            
+            // Check for flat
+            if (numeral.startsWith('b')) {
+                isFlat = true;
+                numeral = numeral.substring(1);
+            }
+            
+            // Check if lowercase (minor)
+            if (numeral === numeral.toLowerCase()) {
+                isMinor = true;
+            }
+            
+            // Convert to degree
+            const numeralMap = { 'i': 0, 'ii': 1, 'iii': 2, 'iv': 3, 'v': 4, 'vi': 5, 'vii': 6 };
+            degree = numeralMap[numeral.toLowerCase()];
+            
+            // Handle flat
+            if (isFlat) {
+                degree = (degree - 1 + 7) % 7;
+            }
+            
+            const chordRoot = rotatedScale[degree];
+            
+            // Determine chord quality based on scale degree and numeral
+            let chordType;
+            if (keyType === 'Major') {
+                // Major key: I, IV, V are major; ii, iii, vi are minor; vii° is diminished (treat as minor for simplicity)
+                if (numeral.toUpperCase() === 'I' || numeral.toUpperCase() === 'IV' || numeral.toUpperCase() === 'V' || numeral.toUpperCase() === 'VII') {
+                    chordType = 'Major';
+                } else {
+                    chordType = 'Minor';
+                }
+            } else {
+                // Minor key: i, iv are minor; V, VI, VII are major
+                if (numeral === numeral.toLowerCase()) {
+                    chordType = 'Minor';
+                } else {
+                    chordType = 'Major';
+                }
+            }
+            
+            return { name: chordRoot, type: chordType, numeral: numeral };
+        }
+
+        let practiceChords = [...chords];
         let currentIndex = 0;
-        let timerInterval = null;
-        let timeRemaining = 10;
+        let timeRemaining = 30;
+        let timerInterval;
         let isRunning = false;
         let isShuffle = false;
-        let practiceChords = [...chords];
 
-        // Chord changes mode variables
-        let changeTimerInterval = null;
+        // Chord changes variables
+        let changeTimerInterval;
         let changeTimeRemaining = 30;
         let isChangesRunning = false;
         let currentChordPair = [];
         let sessionPairs = [];
         let currentPairIndex = 0;
+
+        // Progressions variables
+        let progressionTimerInterval;
+        let progressionTimeRemaining = 30;
+        let isProgressionsRunning = false;
+        let currentKey = null;
+        let currentProgressionIndex = 0;
+        let currentProgressionChords = [];
 
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -475,6 +707,7 @@
             // Stop any running timers
             pausePractice();
             pauseChanges();
+            pauseProgressions();
 
             // Update UI
             document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
@@ -483,11 +716,17 @@
             if (mode === 'single') {
                 document.querySelectorAll('.mode-btn')[0].classList.add('active');
                 document.getElementById('singleMode').classList.add('active');
-            } else {
+            } else if (mode === 'changes') {
                 document.querySelectorAll('.mode-btn')[1].classList.add('active');
                 document.getElementById('changesMode').classList.add('active');
                 if (currentChordPair.length === 0) {
                     generateNewPair();
+                }
+            } else if (mode === 'progressions') {
+                document.querySelectorAll('.mode-btn')[2].classList.add('active');
+                document.getElementById('progressionsMode').classList.add('active');
+                if (!currentKey) {
+                    initializeProgressions();
                 }
             }
         }
@@ -664,6 +903,151 @@
             updateChangesDisplay();
         }
 
+        // Progressions Mode Functions
+        function initializeProgressions() {
+            // Pick random key
+            currentKey = allKeys[Math.floor(Math.random() * allKeys.length)];
+            currentProgressionIndex = 0;
+            generateProgressionChords();
+            updateProgressionsDisplay();
+            initializeProgressTracker();
+        }
+
+        function generateProgressionChords() {
+            const progression = progressions[currentProgressionIndex];
+            currentProgressionChords = progression.numerals.map(numeral => 
+                numeralToChord(numeral, currentKey.root, currentKey.type)
+            );
+        }
+
+        function updateProgressionsDisplay() {
+            // Update progression number
+            document.getElementById('progressionNumber').textContent = 
+                `PROGRESSION ${currentProgressionIndex + 1} / ${progressions.length}`;
+            
+            // Update key
+            document.getElementById('progressionKey').textContent = 
+                `KEY: ${currentKey.root} ${currentKey.type.toUpperCase()}`;
+            
+            // Update chord sequence
+            const sequenceContainer = document.getElementById('progressionSequence');
+            sequenceContainer.innerHTML = '';
+            
+            currentProgressionChords.forEach((chord, idx) => {
+                if (idx > 0) {
+                    const arrow = document.createElement('div');
+                    arrow.className = 'progression-arrow';
+                    arrow.textContent = '→';
+                    sequenceContainer.appendChild(arrow);
+                }
+                
+                const chordDiv = document.createElement('div');
+                chordDiv.className = 'progression-chord';
+                
+                const chordName = document.createElement('div');
+                chordName.className = 'chord';
+                chordName.textContent = `${chord.name}${chord.type === 'Minor' ? 'm' : ''}`;
+                
+                const numeral = document.createElement('div');
+                numeral.className = 'numeral';
+                numeral.textContent = chord.numeral;
+                
+                chordDiv.appendChild(chordName);
+                chordDiv.appendChild(numeral);
+                sequenceContainer.appendChild(chordDiv);
+            });
+            
+            // Update timer
+            document.getElementById('progressionTimerDisplay').textContent = 
+                Math.ceil(progressionTimeRemaining);
+            
+            const progress = (progressionTimeRemaining / parseInt(document.getElementById('progressionTimerInput').value)) * 100;
+            document.getElementById('progressionProgressBar').style.width = progress + '%';
+            
+            // Update progress tracker
+            updateProgressTracker();
+        }
+
+        function initializeProgressTracker() {
+            const tracker = document.getElementById('progressTracker');
+            tracker.innerHTML = '';
+            
+            for (let i = 0; i < progressions.length; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'progress-dot';
+                if (i === 0) dot.classList.add('current');
+                tracker.appendChild(dot);
+            }
+        }
+
+        function updateProgressTracker() {
+            const dots = document.querySelectorAll('.progress-dot');
+            dots.forEach((dot, idx) => {
+                dot.classList.remove('current', 'completed');
+                if (idx < currentProgressionIndex) {
+                    dot.classList.add('completed');
+                } else if (idx === currentProgressionIndex) {
+                    dot.classList.add('current');
+                }
+            });
+        }
+
+        function nextProgression() {
+            currentProgressionIndex++;
+            
+            // Check if we've completed all progressions in this key
+            if (currentProgressionIndex >= progressions.length) {
+                // Move to a new random key
+                const oldKey = currentKey;
+                do {
+                    currentKey = allKeys[Math.floor(Math.random() * allKeys.length)];
+                } while (currentKey.root === oldKey.root && currentKey.type === oldKey.type);
+                
+                currentProgressionIndex = 0;
+            }
+            
+            progressionTimeRemaining = parseInt(document.getElementById('progressionTimerInput').value);
+            generateProgressionChords();
+            updateProgressionsDisplay();
+            
+            // Pulse animation
+            document.querySelectorAll('.progression-chord .chord').forEach(el => {
+                el.classList.add('pulse');
+                setTimeout(() => el.classList.remove('pulse'), 500);
+            });
+        }
+
+        function startProgressions() {
+            if (isProgressionsRunning) return;
+            
+            isProgressionsRunning = true;
+            document.getElementById('startProgressionsBtn').style.display = 'none';
+            document.getElementById('pauseProgressionsBtn').style.display = 'inline-block';
+            
+            progressionTimerInterval = setInterval(() => {
+                progressionTimeRemaining -= 0.1;
+                updateProgressionsDisplay();
+
+                if (progressionTimeRemaining <= 0) {
+                    playBeep(1200); // Even higher pitch for progression change
+                    nextProgression();
+                }
+            }, 100);
+        }
+
+        function pauseProgressions() {
+            isProgressionsRunning = false;
+            clearInterval(progressionTimerInterval);
+            document.getElementById('startProgressionsBtn').style.display = 'inline-block';
+            document.getElementById('pauseProgressionsBtn').style.display = 'none';
+        }
+
+        function resetProgressions() {
+            pauseProgressions();
+            progressionTimeRemaining = parseInt(document.getElementById('progressionTimerInput').value);
+            initializeProgressions();
+        }
+
         // Event listeners
         document.getElementById('timerInput').addEventListener('change', () => {
             if (!isRunning) {
@@ -679,9 +1063,17 @@
             }
         });
 
+        document.getElementById('progressionTimerInput').addEventListener('change', () => {
+            if (!isProgressionsRunning) {
+                progressionTimeRemaining = parseInt(document.getElementById('progressionTimerInput').value);
+                updateProgressionsDisplay();
+            }
+        });
+
         // Initialize
         updateDisplay();
         generateNewPair();
+        initializeProgressions();
     </script>
 
     <script>
