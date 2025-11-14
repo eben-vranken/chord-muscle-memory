@@ -296,6 +296,14 @@
             margin-bottom: 10px;
         }
 
+        .progression-description {
+            font-size: 11px;
+            color: #666;
+            font-style: italic;
+            letter-spacing: 0.5px;
+            margin-bottom: 15px;
+        }
+
         .progression-key {
             font-size: 14px;
             color: #999;
@@ -524,6 +532,7 @@
 
             <div class="progression-display">
                 <div class="progression-info" id="progressionNumber">PROGRESSION 1 / 10</div>
+                <div class="progression-description" id="progressionDescription">Classic "four‑chord" pop progression</div>
                 <div class="progression-key" id="progressionKey">KEY: C MAJOR</div>
                 
                 <div class="progression-sequence" id="progressionSequence">
@@ -547,6 +556,7 @@
                 <button id="startProgressionsBtn" class="btn-primary" onclick="startProgressions()">Start</button>
                 <button id="pauseProgressionsBtn" class="btn-primary" onclick="pauseProgressions()" style="display: none;">Pause</button>
                 <button onclick="resetProgressions()">Reset</button>
+                <button onclick="newKey()">New Key</button>
             </div>
         </div>
     </div>
@@ -571,16 +581,16 @@
 
         // Chord progressions in Roman numeral notation
         const progressions = [
-            { numerals: ['I', 'V', 'vi', 'IV'], name: 'I – V – vi – IV' },
-            { numerals: ['vi', 'IV', 'I', 'V'], name: 'vi – IV – I – V' },
-            { numerals: ['I', 'vi', 'IV', 'V'], name: 'I – vi – IV – V' },
-            { numerals: ['IV', 'V', 'I', 'vi'], name: 'IV – V – I – vi' },
-            { numerals: ['I', 'IV', 'V'], name: 'I – IV – V' },
-            { numerals: ['ii', 'V', 'I'], name: 'ii – V – I' },
-            { numerals: ['i', 'VII', 'VI', 'V'], name: 'i – VII – VI – V' },
-            { numerals: ['I', 'vi', 'ii', 'V'], name: 'I – vi – ii – V' },
-            { numerals: ['I', 'IV', 'bVII', 'IV'], name: 'I – IV – ♭VII – IV' },
-            { numerals: ['vi', 'ii', 'V', 'I'], name: 'vi – ii – V – I' }
+            { numerals: ['I', 'V', 'vi', 'IV'], name: 'I – V – vi – IV', keyType: 'Major', description: 'Classic "four‑chord" pop progression' },
+            { numerals: ['vi', 'IV', 'I', 'V'], name: 'vi – IV – I – V', keyType: 'Major', description: 'Starts on minor, popular in pop/rock' },
+            { numerals: ['I', 'vi', 'IV', 'V'], name: 'I – vi – IV – V', keyType: 'Major', description: 'Another common four‑chord variation' },
+            { numerals: ['IV', 'V', 'I', 'vi'], name: 'IV – V – I – vi', keyType: 'Major', description: 'Circular feel, often in pop songs' },
+            { numerals: ['I', 'IV', 'V'], name: 'I – IV – V', keyType: 'Major', description: 'Basic three‑chord progression, rock/folk' },
+            { numerals: ['ii', 'V', 'I'], name: 'ii – V – I', keyType: 'Major', description: 'Jazz standard progression' },
+            { numerals: ['i', 'VII', 'VI', 'V'], name: 'i – VII – VI – V', keyType: 'Minor', description: 'Descending minor progression' },
+            { numerals: ['I', 'vi', 'ii', 'V'], name: 'I – vi – ii – V', keyType: 'Major', description: 'Turnaround, jazz/pop standard' },
+            { numerals: ['I', 'IV', 'bVII', 'IV'], name: 'I – IV – ♭VII – IV', keyType: 'Major', description: 'Rock/pop flavour using ♭VII' },
+            { numerals: ['vi', 'ii', 'V', 'I'], name: 'vi – ii – V – I', keyType: 'Major', description: 'Circle of fifths root motion' }
         ];
 
         // Major and minor scales
@@ -905,7 +915,7 @@
 
         // Progressions Mode Functions
         function initializeProgressions() {
-            // Pick random key
+            // Pick any random key (major or minor)
             currentKey = allKeys[Math.floor(Math.random() * allKeys.length)];
             currentProgressionIndex = 0;
             generateProgressionChords();
@@ -914,6 +924,27 @@
         }
 
         function generateProgressionChords() {
+            // Find the next progression that matches the current key type
+            let attempts = 0;
+            while (attempts < progressions.length) {
+                const progression = progressions[currentProgressionIndex];
+                
+                // Check if this progression matches the current key type
+                if (progression.keyType === currentKey.type) {
+                    // Good match - generate the chords
+                    currentProgressionChords = progression.numerals.map(numeral => 
+                        numeralToChord(numeral, currentKey.root, currentKey.type)
+                    );
+                    return;
+                } else {
+                    // Skip to next progression
+                    currentProgressionIndex = (currentProgressionIndex + 1) % progressions.length;
+                    attempts++;
+                }
+            }
+            
+            // If we get here, no matching progressions found (shouldn't happen)
+            // Just generate with current progression anyway
             const progression = progressions[currentProgressionIndex];
             currentProgressionChords = progression.numerals.map(numeral => 
                 numeralToChord(numeral, currentKey.root, currentKey.type)
@@ -921,9 +952,16 @@
         }
 
         function updateProgressionsDisplay() {
+            // Get current progression
+            const currentProgression = progressions[currentProgressionIndex];
+            
             // Update progression number
             document.getElementById('progressionNumber').textContent = 
                 `PROGRESSION ${currentProgressionIndex + 1} / ${progressions.length}`;
+            
+            // Update description
+            document.getElementById('progressionDescription').textContent = 
+                currentProgression.description;
             
             // Update key
             document.getElementById('progressionKey').textContent = 
@@ -995,19 +1033,20 @@
         function nextProgression() {
             currentProgressionIndex++;
             
-            // Check if we've completed all progressions in this key
+            // Check if we've completed all progressions
             if (currentProgressionIndex >= progressions.length) {
-                // Move to a new random key
+                // Move to any new random key (major or minor)
                 const oldKey = currentKey;
+                
                 do {
                     currentKey = allKeys[Math.floor(Math.random() * allKeys.length)];
-                } while (currentKey.root === oldKey.root && currentKey.type === oldKey.type);
+                } while (allKeys.length > 1 && currentKey.root === oldKey.root && currentKey.type === oldKey.type);
                 
                 currentProgressionIndex = 0;
             }
             
             progressionTimeRemaining = parseInt(document.getElementById('progressionTimerInput').value);
-            generateProgressionChords();
+            generateProgressionChords(); // This will auto-skip to matching progression
             updateProgressionsDisplay();
             
             // Pulse animation
@@ -1046,6 +1085,28 @@
             pauseProgressions();
             progressionTimeRemaining = parseInt(document.getElementById('progressionTimerInput').value);
             initializeProgressions();
+        }
+
+        function newKey() {
+            pauseProgressions();
+            
+            // Pick any random key (major or minor), avoiding the current one
+            const oldKey = currentKey;
+            do {
+                currentKey = allKeys[Math.floor(Math.random() * allKeys.length)];
+            } while (allKeys.length > 1 && currentKey.root === oldKey.root && currentKey.type === oldKey.type);
+            
+            // Regenerate chords for current progression in the new key
+            // This will auto-skip to a matching progression if needed
+            progressionTimeRemaining = parseInt(document.getElementById('progressionTimerInput').value);
+            generateProgressionChords();
+            updateProgressionsDisplay();
+            
+            // Pulse animation
+            document.querySelectorAll('.progression-chord .chord').forEach(el => {
+                el.classList.add('pulse');
+                setTimeout(() => el.classList.remove('pulse'), 500);
+            });
         }
 
         // Event listeners
